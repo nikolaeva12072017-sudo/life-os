@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="theme-color" content="#FBEAF0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="My Life OS">
+<link rel="manifest" href="manifest.json">
+<title>My Life OS</title>
+<style>
+:root {
+  --pink-50:#FBEAF0;--pink-100:#F4C0D1;--pink-200:#ED93B1;
+  --pink-400:#D4537E;--pink-600:#993556;--pink-800:#72243E;
+  --green-bg:#EAF3DE;--green-text:#3B6D11;
+  --bg:#ffffff;--bg2:#fdf6f9;--border:rgba(212,83,126,0.15);
+  --text:#2c1a22;--muted:#9a6878;--radius:14px;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;background:var(--bg2);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:var(--text);}
+.app{display:flex;flex-direction:column;height:100vh;max-width:480px;margin:0 auto;background:var(--bg);}
+.header{background:var(--pink-50);padding:52px 20px 14px;border-bottom:0.5px solid var(--pink-100);flex-shrink:0;}
+.header-row{display:flex;justify-content:space-between;align-items:center;}
+.app-title{font-size:22px;font-weight:600;color:var(--pink-800);}
+.header-date{font-size:12px;color:var(--pink-600);margin-top:2px;}
+.header-greeting{font-size:13px;color:var(--pink-600);margin-top:4px;}
+.icon-btn{background:none;border:none;color:var(--pink-400);font-size:22px;cursor:pointer;padding:4px;}
+.nav-tabs{display:flex;background:var(--bg);border-bottom:0.5px solid var(--border);overflow-x:auto;scrollbar-width:none;flex-shrink:0;}
+.nav-tabs::-webkit-scrollbar{display:none;}
+.tab{flex:0 0 auto;padding:11px 16px;font-size:13px;color:var(--muted);border:none;background:none;border-bottom:2px solid transparent;cursor:pointer;white-space:nowrap;}
+.tab.active{color:var(--pink-600);border-bottom-color:var(--pink-400);font-weight:500;}
+.content{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:14px;padding-bottom:90px;}
+.card{background:var(--bg);border:0.5px solid var(--border);border-radius:var(--radius);padding:14px 16px;}
+.section-label{font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px;}
+.diary-preview{font-size:14px;color:var(--text);line-height:1.6;border-left:3px solid var(--pink-200);padding-left:10px;font-style:italic;min-height:40px;cursor:pointer;}
+.add-link{margin-top:10px;font-size:12px;color:var(--pink-400);font-weight:500;cursor:pointer;display:inline-block;}
+.habits-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.habit-item{background:var(--bg2);border-radius:10px;padding:10px 12px;display:flex;align-items:center;gap:10px;cursor:pointer;border:0.5px solid var(--border);}
+.habit-circle{width:22px;height:22px;border-radius:50%;border:1.5px solid var(--pink-200);flex-shrink:0;display:flex;align-items:center;justify-content:center;}
+.habit-circle.done{background:var(--pink-400);border-color:var(--pink-400);}
+.habit-circle.done::after{content:'✓';color:white;font-size:12px;font-weight:600;}
+.habit-name{font-size:13px;color:var(--text);}
+.progress-bar{margin-top:12px;}
+.progress-text{font-size:11px;color:var(--muted);margin-bottom:5px;}
+.progress-track{height:5px;background:var(--pink-100);border-radius:4px;}
+.progress-fill{height:100%;background:var(--pink-400);border-radius:4px;transition:width 0.3s;}
+.task-item{display:flex;align-items:center;gap:12px;padding:6px 0;border-bottom:0.5px solid var(--border);}
+.task-item:last-child{border-bottom:none;}
+.task-check{width:20px;height:20px;border-radius:6px;border:1.5px solid var(--pink-200);flex-shrink:0;display:flex;align-items:center;justify-content:center;cursor:pointer;}
+.task-check.done{background:var(--pink-400);border-color:var(--pink-400);}
+.task-check.done::after{content:'✓';color:white;font-size:11px;font-weight:600;}
+.task-text{font-size:14px;color:var(--text);flex:1;}
+.task-text.done{text-decoration:line-through;color:var(--muted);}
+.task-add{display:flex;align-items:center;gap:10px;padding:8px 0 2px;cursor:pointer;}
+.task-add-icon{width:20px;height:20px;border-radius:6px;border:1.5px dashed var(--pink-200);display:flex;align-items:center;justify-content:center;color:var(--pink-400);font-size:16px;}
+.task-add-text{font-size:13px;color:var(--pink-400);}
+.fab{position:fixed;bottom:82px;right:calc(50% - 220px);width:50px;height:50px;background:var(--pink-400);border-radius:50%;border:none;color:white;font-size:26px;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:101;transition:transform 0.15s;}
+.fab:active{transform:scale(0.93);}
+@media(max-width:480px){.fab{right:20px;}}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.35);z-index:200;display:none;align-items:flex-end;justify-content:center;}
+.modal-overlay.open{display:flex;}
+.modal{background:var(--bg);border-radius:20px 20px 0 0;width:100%;max-width:480px;padding:20px 20px 40px;max-height:90vh;overflow-y:auto;}
+.modal-handle{width:36px;height:4px;background:var(--border);border-radius:2px;margin:0 auto 16px;}
+.modal-title{font-size:16px;font-weight:600;color:var(--pink-800);margin-bottom:14px;}
+.input-field{width:100%;border:1px solid var(--pink-100);border-radius:10px;padding:12px 14px;font-size:14px;color:var(--text);background:var(--bg2);font-family:inherit;resize:none;outline:none;}
+.input-field:focus{border-color:var(--pink-200);}
+.modal-actions{display:flex;gap:10px;margin-top:14px;}
+.btn-primary{flex:1;background:var(--pink-400);color:white;border:none;border-radius:10px;padding:13px;font-size:14px;font-weight:500;cursor:pointer;font-family:inherit;}
+.btn-secondary{flex:1;background:var(--bg2);color:var(--muted);border:1px solid var(--border);border-radius:10px;padding:13px;font-size:14px;cursor:pointer;font-family:inherit;}
+.input-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;}
+.input-label{font-size:12px;color:var(--muted);margin-bottom:4px;}
+.page{display:none;flex:1;flex-direction:column;overflow:hidden;}
+.page.active{display:flex;}
+.diary-list{padding:16px;display:flex;flex-direction:column;gap:12px;overflow-y:auto;padding-bottom:90px;flex:1;}
+.diary-card{background:var(--bg);border:0.5px solid var(--border);border-radius:var(--radius);padding:14px 16px;cursor:pointer;}
+.diary-card-date{font-size:11px;color:var(--pink-400);font-weight:600;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.04em;}
+.diary-card-text{font-size:13px;color:var(--text);line-height:1.6;font-style:italic;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;}
+.habits-page{padding:16px;overflow-y:auto;flex:1;padding-bottom:90px;}
+.week-row{display:flex;gap:6px;margin-bottom:16px;}
+.week-day{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;}
+.week-day-label{font-size:10px;color:var(--muted);}
+.week-day-dot{width:28px;height:28px;border-radius:50%;background:var(--bg2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--muted);}
+.week-day-dot.today{border-color:var(--pink-400);color:var(--pink-600);font-weight:600;}
+.week-day-dot.filled{background:var(--pink-400);border-color:var(--pink-400);color:white;}
+.habit-row{background:var(--bg);border:0.5px solid var(--border);border-radius:var(--radius);padding:12px 16px;display:flex;align-items:center;gap:12px;margin-bottom:8px;}
+.habit-row-name{flex:1;font-size:14px;color:var(--text);}
+.habit-toggle{width:44px;height:26px;border-radius:13px;background:var(--pink-100);border:none;cursor:pointer;position:relative;transition:background 0.2s;flex-shrink:0;}
+.habit-toggle.on{background:var(--pink-400);}
+.habit-toggle::after{content:'';position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:white;transition:left 0.2s;}
+.habit-toggle.on::after{left:21px;}
+/* FINANCE */
+.finance-page{padding:16px;overflow-y:auto;flex:1;padding-bottom:90px;display:flex;flex-direction:column;gap:14px;}
+.stats-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.stat-card{background:var(--bg2);border-radius:var(--radius);padding:14px;border:0.5px solid var(--border);}
+.stat-label{font-size:11px;color:var(--muted);margin-bottom:4px;}
+.stat-value{font-size:20px;font-weight:600;}
+.stat-value.income{color:var(--green-text);}
+.stat-value.expense{color:var(--pink-600);}
+.stat-value.balance{color:var(--pink-800);}
+.tx-item{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:0.5px solid var(--border);}
+.tx-item:last-child{border-bottom:none;}
+.tx-icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}
+.tx-icon.income{background:var(--green-bg);}
+.tx-icon.expense{background:var(--pink-50);}
+.tx-info{flex:1;min-width:0;}
+.tx-name{font-size:14px;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.tx-date{font-size:11px;color:var(--muted);margin-top:1px;}
+.tx-amount{font-size:15px;font-weight:600;white-space:nowrap;}
+.tx-amount.income{color:var(--green-text);}
+.tx-amount.expense{color:var(--pink-600);}
+.type-toggle{display:flex;background:var(--bg2);border-radius:10px;padding:3px;margin-bottom:14px;}
+.type-btn{flex:1;padding:8px;border:none;background:none;border-radius:8px;font-size:13px;cursor:pointer;color:var(--muted);font-family:inherit;}
+.type-btn.active{background:var(--bg);color:var(--pink-600);font-weight:500;}
+/* HEALTH */
+.health-page{padding:16px;overflow-y:auto;flex:1;padding-bottom:90px;display:flex;flex-direction:column;gap:14px;}
+.weight-display{text-align:center;padding:12px 0 4px;}
+.weight-current{font-size:52px;font-weight:600;color:var(--pink-800);line-height:1;}
+.weight-unit{font-size:20px;color:var(--muted);}
+.weight-change{font-size:13px;color:var(--muted);margin-top:6px;}
+.weight-change.down{color:var(--green-text);}
+.weight-change.up{color:var(--pink-600);}
+.measure-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.measure-item{background:var(--bg2);border-radius:10px;padding:10px 12px;border:0.5px solid var(--border);}
+.measure-name{font-size:11px;color:var(--muted);margin-bottom:2px;}
+.measure-val{font-size:20px;font-weight:600;color:var(--pink-800);}
+.measure-unit-sm{font-size:12px;color:var(--muted);}
+.health-log-item{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:0.5px solid var(--border);}
+.health-log-item:last-child{border-bottom:none;}
+.health-log-date{font-size:12px;color:var(--muted);}
+.health-log-vals{display:flex;gap:12px;font-size:13px;color:var(--text);font-weight:500;}
+.mini-chart{display:flex;align-items:flex-end;gap:3px;height:40px;padding:4px 0;}
+.mini-bar{flex:1;background:var(--pink-200);border-radius:3px 3px 0 0;min-height:3px;}
+/* COLLECTIONS */
+.collections-page{padding:16px;overflow-y:auto;flex:1;padding-bottom:90px;display:flex;flex-direction:column;gap:14px;}
+.coll-tabs{display:flex;gap:8px;margin-bottom:4px;}
+.coll-tab{flex:1;padding:8px;border:1px solid var(--border);border-radius:10px;background:var(--bg2);font-size:13px;color:var(--muted);cursor:pointer;font-family:inherit;text-align:center;}
+.coll-tab.active{background:var(--pink-50);border-color:var(--pink-200);color:var(--pink-600);font-weight:500;}
+.coll-item{display:flex;align-items:flex-start;gap:12px;padding:12px 0;border-bottom:0.5px solid var(--border);}
+.coll-item:last-child{border-bottom:none;}
+.coll-emoji{font-size:28px;flex-shrink:0;width:40px;text-align:center;}
+.coll-info{flex:1;min-width:0;}
+.coll-title{font-size:14px;font-weight:500;color:var(--text);}
+.coll-author{font-size:12px;color:var(--muted);margin-top:1px;}
+.coll-note{font-size:12px;color:var(--text);margin-top:4px;font-style:italic;}
+.stars{display:flex;gap:2px;margin-top:4px;}
+.star{font-size:14px;cursor:pointer;}
+.coll-status{font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px;margin-top:4px;display:inline-block;}
+.coll-status.reading{background:var(--pink-50);color:var(--pink-600);}
+.coll-status.done{background:var(--green-bg);color:var(--green-text);}
+.coll-status.want{background:#E6F1FB;color:#185FA5;}
+/* GROWTH */
+.growth-page{padding:16px;overflow-y:auto;flex:1;padding-bottom:90px;display:flex;flex-direction:column;gap:14px;}
+.growth-item{display:flex;align-items:flex-start;gap:12px;padding:12px;background:var(--bg);border:0.5px solid var(--border);border-radius:var(--radius);}
+.growth-icon{font-size:22px;flex-shrink:0;}
+.growth-info{flex:1;min-width:0;}
+.growth-title{font-size:14px;font-weight:500;color:var(--text);}
+.growth-type{font-size:11px;color:var(--muted);margin-top:1px;}
+.growth-note{font-size:12px;color:var(--text);margin-top:4px;line-height:1.5;}
+.growth-link{font-size:12px;color:var(--pink-400);margin-top:4px;word-break:break-all;}
+.growth-type-badge{font-size:10px;padding:2px 8px;border-radius:20px;display:inline-block;margin-top:4px;}
+.growth-type-badge.course{background:var(--pink-50);color:var(--pink-600);}
+.growth-type-badge.note{background:#E6F1FB;color:#185FA5;}
+.growth-type-badge.link{background:var(--green-bg);color:var(--green-text);}
+/* PLANNER */
+.planner-page{padding:16px;overflow-y:auto;flex:1;padding-bottom:90px;display:flex;flex-direction:column;gap:14px;}
+.planner-week{display:flex;gap:6px;margin-bottom:4px;}
+.planner-day-btn{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 4px;border-radius:10px;border:1px solid var(--border);background:var(--bg2);cursor:pointer;font-family:inherit;}
+.planner-day-btn.active{background:var(--pink-400);border-color:var(--pink-400);}
+.planner-day-btn .day-name{font-size:10px;color:var(--muted);}
+.planner-day-btn.active .day-name{color:rgba(255,255,255,0.8);}
+.planner-day-btn .day-num{font-size:16px;font-weight:600;color:var(--text);}
+.planner-day-btn.active .day-num{color:white;}
+.time-slot{display:flex;gap:12px;padding:6px 0;border-bottom:0.5px solid var(--border);align-items:flex-start;}
+.time-slot:last-child{border-bottom:none;}
+.time-label{font-size:11px;color:var(--muted);width:38px;flex-shrink:0;padding-top:2px;}
+.slot-content{flex:1;}
+.slot-event{background:var(--pink-50);border-left:3px solid var(--pink-400);border-radius:0 6px 6px 0;padding:6px 10px;font-size:13px;color:var(--text);margin-bottom:4px;}
+.slot-empty{font-size:13px;color:var(--border);cursor:pointer;}
+/* CALENDAR */
+.calendar-page{padding:16px;overflow-y:auto;flex:1;padding-bottom:90px;display:flex;flex-direction:column;gap:14px;}
+.cal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
+.cal-month{font-size:16px;font-weight:600;color:var(--pink-800);}
+.cal-nav{background:none;border:none;color:var(--pink-400);font-size:20px;cursor:pointer;padding:4px 8px;}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;}
+.cal-day-name{text-align:center;font-size:10px;color:var(--muted);padding:4px 0;font-weight:500;}
+.cal-day{aspect-ratio:1;display:flex;align-items:center;justify-content:center;border-radius:50%;font-size:13px;color:var(--text);cursor:pointer;position:relative;}
+.cal-day.today{background:var(--pink-400);color:white;font-weight:600;}
+.cal-day.other-month{color:var(--border);}
+.cal-day.has-event::after{content:'';position:absolute;bottom:2px;width:4px;height:4px;border-radius:50%;background:var(--pink-400);}
+.cal-day.today.has-event::after{background:white;}
+.event-item{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:0.5px solid var(--border);}
+.event-item:last-child{border-bottom:none;}
+.event-dot{width:10px;height:10px;border-radius:50%;background:var(--pink-400);flex-shrink:0;}
+.event-info{flex:1;}
+.event-title{font-size:14px;color:var(--text);}
+.event-date{font-size:11px;color:var(--muted);margin-top:2px;}
+</style>
+</head>
+<body>
+<div class="app">
+<div class="header">
+  <div class="header-row">
+    <div class="app-title">My Life OS 🌸</div>
+    <button class="icon-btn" onclick="openAddModal()" aria-label="Додати">+</button>
+  </div>
+  <div class="header-date" id="headerDate"></div>
+  <div class="header-greeting" id="headerGreeting"></div>
+</div>
+
+<div class="nav-tabs">
+  <button class="tab active" onclick="showTab('today',this)">Сьогодні</button>
+  <button class="tab" onclick="showTab('diary',this)">Щоденник</button>
+  <button class="tab" onclick="showTab('habits',this)">Звички</button>
+  <button class="tab" onclick="showTab('tasks',this)">Задачі</button>
+  <button class="tab" onclick="showTab('finance',this)">Фінанси</button>
+  <button class="tab" onclick="showTab('health',this)">Здоров'я</button>
+  <button class="tab" onclick="showTab('collections',this)">Колекції</button>
+  <button class="tab" onclick="showTab('growth',this)">Розвиток</button>
+  <button class="tab" onclick="showTab('planner',this)">Планер</button>
+  <button class="tab" onclick="showTab('calendar',this)">Календар</button>
+</div>
+
+<!-- TODAY -->
+<div id="page-today" class="page active">
+  <div class="content">
+    <div>
+      <div class="section-label">Запис дня</div>
+      <div class="card">
+        <div class="diary-preview" id="todayDiaryPreview" onclick="openDiaryModal()">Натисніть, щоб записати думки...</div>
+        <span class="add-link" onclick="openDiaryModal()">+ Редагувати запис</span>
+      </div>
+    </div>
+    <div>
+      <div class="section-label">Звички на сьогодні</div>
+      <div class="card">
+        <div class="habits-grid" id="todayHabits"></div>
+        <div class="progress-bar">
+          <div class="progress-text" id="habitProgressText">0 з 0 виконано</div>
+          <div class="progress-track"><div class="progress-fill" id="habitProgressFill" style="width:0%"></div></div>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="section-label">Задачі сьогодні</div>
+      <div class="card">
+        <div id="todayTasksList"></div>
+        <div class="task-add" onclick="openTaskModal()">
+          <div class="task-add-icon">+</div><span class="task-add-text">Додати задачу</span>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="section-label">Найближчі події</div>
+      <div class="card" id="todayEvents"><div style="font-size:13px;color:var(--muted)">Немає найближчих подій</div></div>
+    </div>
+    <div>
+      <div class="section-label">Баланс місяця</div>
+      <div class="stats-row">
+        <div class="stat-card"><div class="stat-label">Доходи</div><div class="stat-value income" id="todayIncome">0 ₴</div></div>
+        <div class="stat-card"><div class="stat-label">Витрати</div><div class="stat-value expense" id="todayExpense">0 ₴</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- DIARY -->
+<div id="page-diary" class="page">
+  <div class="diary-list" id="diaryList"></div>
+</div>
+
+<!-- HABITS -->
+<div id="page-habits" class="page">
+  <div class="habits-page">
+    <div class="section-label">Цей тиждень</div>
+    <div class="week-row" id="weekRow"></div>
+    <div class="section-label" style="margin-top:4px">Мої звички</div>
+    <div id="habitsList"></div>
+    <div class="task-add" onclick="openHabitModal()">
+      <div class="task-add-icon">+</div><span class="task-add-text">Додати звичку</span>
+    </div>
+  </div>
+</div>
+
+<!-- TASKS -->
+<div id="page-tasks" class="page">
+  <div class="content">
+    <div class="section-label">Всі задачі</div>
+    <div class="card">
+      <div id="allTasksList"></div>
+      <div class="task-add" onclick="openTaskModal()">
+        <div class="task-add-icon">+</div><span class="task-add-text">Додати задачу</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- FINANCE -->
+<div id="page-finance" class="page">
+  <div class="finance-page">
+    <div class="stats-row">
+      <div class="stat-card"><div class="stat-label">Доходи місяця</div><div class="stat-value income" id="finIncome">0 ₴</div></div>
+      <div class="stat-card"><div class="stat-label">Витрати місяця</div><div class="stat-value expense" id="finExpense">0 ₴</div></div>
+    </div>
+    <div class="card" style="text-align:center;padding:12px;">
+      <div class="stat-label">Залишок</div>
+      <div class="stat-value balance" id="finBalance" style="font-size:28px">0 ₴</div>
+    </div>
+    <div>
+      <div class="section-label">Останні операції</div>
+      <div class="card">
+        <div id="txList"></div>
+        <div class="task-add" onclick="openFinanceModal()">
+          <div class="task-add-icon">+</div><span class="task-add-text">Додати операцію</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- HEALTH -->
+<div id="page-health" class="page">
+  <div class="health-page">
+    <div>
+      <div class="section-label">Поточна вага</div>
+      <div class="card">
+        <div class="weight-display">
+          <div><span class="weight-current" id="weightCurrent">—</span><span class="weight-unit"> кг</span></div>
+          <div class="weight-change" id="weightChange">Введіть першу позначку</div>
+        </div>
+        <div class="mini-chart" id="weightChart"></div>
+      </div>
+    </div>
+    <div>
+      <div class="section-label">Заміри (см)</div>
+      <div class="measure-grid" id="measureGrid"></div>
+    </div>
+    <div>
+      <div class="section-label">Журнал вимірювань</div>
+      <div class="card">
+        <div id="healthLog"></div>
+        <div class="task-add" onclick="openHealthModal()">
+          <div class="task-add-icon">+</div><span class="task-add-text">Додати вимірювання</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- COLLECTIONS -->
+<div id="page-collections" class="page">
+  <div class="collections-page">
+    <div class="coll-tabs">
+      <button class="coll-tab active" onclick="setCollType('book',this)">📚 Книги</button>
+      <button class="coll-tab" onclick="setCollType('movie',this)">🎬 Фільми</button>
+    </div>
+    <div class="card">
+      <div id="collList"></div>
+      <div class="task-add" onclick="openCollModal()">
+        <div class="task-add-icon">+</div><span class="task-add-text" id="collAddText">Додати книгу</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- GROWTH -->
+<div id="page-growth" class="page">
+  <div class="growth-page">
+    <div class="coll-tabs">
+      <button class="coll-tab active" onclick="setGrowthFilter('all',this)">Все</button>
+      <button class="coll-tab" onclick="setGrowthFilter('course',this)">Курси</button>
+      <button class="coll-tab" onclick="setGrowthFilter('note',this)">Нотатки</button>
+      <button class="coll-tab" onclick="setGrowthFilter('link',this)">Посилання</button>
+    </div>
+    <div id="growthList"></div>
+    <div class="task-add" onclick="openGrowthModal()">
+      <div class="task-add-icon">+</div><span class="task-add-text">Додати запис</span>
+    </div>
+  </div>
+</div>
+
+<!-- PLANNER -->
+<div id="page-planner" class="page">
+  <div class="planner-page">
+    <div class="planner-week" id="plannerWeek"></div>
+    <div class="section-label" id="plannerDayLabel">Сьогодні</div>
+    <div class="card">
+      <div id="plannerSlots"></div>
+    </div>
+    <div class="task-add" onclick="openPlannerModal()">
+      <div class="task-add-icon">+</div><span class="task-add-text">Додати подію до планера</span>
+    </div>
+  </div>
+</div>
+
+<!-- CALENDAR -->
+<div id="page-calendar" class="page">
+  <div class="calendar-page">
+    <div class="card">
+      <div class="cal-header">
+        <button class="cal-nav" onclick="changeMonth(-1)">‹</button>
+        <div class="cal-month" id="calMonth"></div>
+        <button class="cal-nav" onclick="changeMonth(1)">›</button>
+      </div>
+      <div class="cal-grid" id="calGrid"></div>
+    </div>
+    <div>
+      <div class="section-label" id="calEventsLabel">Всі події</div>
+      <div class="card">
+        <div id="calEventsList"></div>
+        <div class="task-add" onclick="openEventModal()">
+          <div class="task-add-icon">+</div><span class="task-add-text">Додати подію</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div><!-- .app -->
+
+<button class="fab" onclick="openAddModal()" aria-label="Додати">+</button>
+
+<!-- DIARY MODAL -->
+<div class="modal-overlay" id="diaryModal">
+  <div class="modal"><div class="modal-handle"></div><div class="modal-title">Запис дня</div>
+    <textarea class="input-field" id="diaryInput" rows="6" placeholder="Як минув твій день?"></textarea>
+    <div class="modal-actions"><button class="btn-secondary" onclick="closeModal('diaryModal')">Скасувати</button><button class="btn-primary" onclick="saveDiary()">Зберегти</button></div>
+  </div>
+</div>
+<!-- TASK MODAL -->
+<div class="modal-overlay" id="taskModal">
+  <div class="modal"><div class="modal-handle"></div><div class="modal-title">Нова задача</div>
+    <input class="input-field" id="taskInput" type="text" placeholder="Що потрібно зробити?">
+    <div class="modal-actions"><button class="btn-secondary" onclick="closeModal('taskModal')">Скасувати</button><button class="btn-primary" onclick="saveTask()">Додати</button></div>
+  </div>
+</div>
+<!-- HABIT MODAL -->
+<div class="modal-overlay" id="habitModal">
+  <div class="modal"><div class="modal-handle"></div><div class="modal-title">Нова звичка</div>
+    <input class="input-field" id="habitInput" type="text" placeholder="Назва звички (напр: Вода 2л)">
+    <div class="modal-actions"><button class="btn-secondary" onclick="closeModal('habitModal')">Скасувати</button><button class="btn-primary" onclick="saveHabit()">Додати</button></div>
+  </div>
+</div>
+<!-- FINANCE MODAL -->
+<div class="modal-overlay" id="financeModal">
+  <div class="modal"><div class="modal-handle"></div><div class="modal-title">Нова операція</div>
+    <div class="type-toggle">
+      <button class="type-btn active" id="typeIncome" onclick="setTxType('income')">💚 Дохід</button>
+      <button class="type-btn" id="typeExpense" onclick="setTxType('expense')">🌸 Витрата</button>
+    </div>
+    <div style="margin-bottom:10px"><div class="input-label">Опис</div><input class="input-field" id="txName" type="text" placeholder="Назва (напр: Зарплата)"></div>
+    <div style="margin-bottom:10px"><div class="input-label">Сума (₴)</div><input class="input-field" id="txAmount" type="number" placeholder="0.00" inputmode="decimal"></div>
+    <div class="modal-actions"><button class="btn-secondary" onclick="closeModal('financeModal')">Скасувати</button><button class="btn-primary" onclick="saveTransaction()">Зберегти</button></div>
+  </div>
+</div>
+<!-- HEALTH MODAL -->
+<div class="modal-overlay" id="healthModal">
+  <div class="modal"><div class="modal-handle"></div><div class="modal-title">Вимірювання</div>
+    <div class="input-row">
+      <div><div class="input-label">Вага (кг)</div><input class="input-field" id="hWeight" type="number" placeholder="65.0" inputmode="decimal"></div>
+      <div><div class="input-label">Талія (см)</div><input class="input-field" id="hWaist" type="number" placeholder="70" inputmode="decimal"></div>
+    </div>
+    <div class="input-row">
+      <div><div class="input-label">Груди (см)</div><input class="input-field" id="hChest" type="number" placeholder="90" inputmode="decimal"></div>
+      <div><div class="input-label">Стегна (см)</div><input class="input-field" id="hHips" type="number" placeholder="95" inputmode="decimal"></div>
+    </div>
+    <div class="modal-actions"><button class="btn-secondary" onclick="closeModal('healthModal')">Скасувати</button><button class="btn-primary" onclick="saveHealth()">Зберегти</button></div>
+  </div>
+</div>
+<!-- COLLECTION MODAL -->
+<div class="modal-overlay" id="collModal">
+  <div class="modal"><div class="modal-handle"></div><div class="modal-title" id="collModalTitle">Нова книга</div>
+    <div style="margin-bottom:10px"><div class="input-label">Назва</div><input class="input-field" id="collTitle" type="text" placeholder="Назва книги / фільму"></div>
+    <div style="margin-bottom:10px"><div class="input-label">Автор / Режисер</div><input class="input-field" id="collAuthor" type="text" placeholder="Ім'я автора"></div>
+    <div style="margin-bottom:10px">
+      <div class="input-label">Статус</div>
+      <select class="input-field" id="collStatus">
+        <option value="want">Хочу прочитати/переглянути</option>
+        <option value="reading">Зараз читаю/дивлюся</option>
+        <option value="done">Прочитано/Переглянуто</option>
+      </select>
+    </div>
+    <div style="margin-bottom:10px"><div class="input-label">Нотатка</div><textarea class="input-field" id="collNote" rows="3" placeholder="Враження, думки..."></textarea></div>
+    <div class="modal-actions"><button class="btn-secondary" onclick="closeModal('collModal')">Скасувати</button><button class="btn-primary" onclick="saveColl()">Зберегти</button></div>
+  </div>
+</div>
+<!-- GROWTH MODAL -->
+<div class="modal-overlay" id="growthModal">
+  <div class="modal"><div class="modal-handle"></div><div class="modal-title">Новий запис</div>
+    <div style="margin-bottom:10px">
+      <div class="input-label">Тип</div>
+      <select class="input-field" id="growthType">
+        <option value="course">📖 Курс</option>
+        <option value="note">✏️ Нотатка</option>
+        <option value="link">🔗 Посилання</option>
+      </select>
+    </div>
+    <div style="margin-bottom:10px"><div class="input-label">Назва</div><input class="input-field" id="growthTitle" type="text" placeholder="Назва курсу / теми"></div>
+    <div style="margin-bottom:10px"><div class="input-label">Нотатка / опис</div><textarea class="input-field" id="growthNote" rows="3" placeholder="Що вивчили? Головні думки..."></textarea></div>
+    <div style="margin-bottom:10px"><div class="input-label">Посилання (необов'язково)</div><input class="input-field" id="growthLink" type="url" placeholder="https://..."></div>
+    <div class="modal-actions"><button class="btn-secondary" onclick="closeModal('growthModal')">Скасувати</button><button class="btn-primary" onclick="saveGrowth()">Зберегти</button></div>
+  </div>
+</div>
+<!-- PLANNER MODAL -->
+<div class="modal-overlay" id="plannerModal">
+  <div class="modal"><div class="modal-handle"></div><div class="modal-title">Подія до планера</div>
+    <div style="margin-bottom:10px"><div class="input-label">Час</div>
+      <select class="input-field" id="plannerTime">
+        <option>06:00</option><option>07:00</option><option>08:00</option><option>09:00</option>
+        <option>10:00</option><option>11:00</option><option selected>12:00</option><option>13:00</option>
+        <option>14:00</option><option>15:00</option><option>16:00</option><option>17:00</option>
+        <option>18:00</option><option>19:00</option><option>20:00</option><option>21:00</option><option>22:00</option>
+      </select>
+    </div>
+    <div style="margin-bottom:10px"><div class="input-label">Назва події</div><input class="input-field" id="plannerEventTitle" type="text" placeholder="Що заплановано?"></div>
+    <div class="modal-actions"><button class="btn-secondary" onclick="closeModal('plannerModal')">Скасувати</button><button class="btn-primary" onclick="savePlannerEvent()">Зберегти</button></div>
+  </div>
+</div>
+<!-- EVENT MODAL -->
+<div class="modal-overlay" id="eventModal">
+  <div class="modal"><div class="modal-handle"></div><div class="modal-title">Нова подія</div>
+    <div style="margin-bottom:10px"><div class="input-label">Назва</div><input class="input-field" id="eventTitle" type="text" placeholder="Назва події"></div>
+    <div style="margin-bottom:10px"><div class="input-label">Дата</div><input class="input-field" id="eventDate" type="date"></div>
+    <div style="margin-bottom:10px"><div class="input-label">Нотатка (необов'язково)</div><input class="input-field" id="eventNote" type="text" placeholder="Деталі..."></div>
+    <div class="modal-actions"><button class="btn-secondary" onclick="closeModal('eventModal')">Скасувати</button><button class="btn-primary" onclick="saveEvent()">Зберегти</button></div>
+  </div>
+</div>
+<!-- ADD CHOICE -->
+<div class="modal-overlay" id="addModal">
+  <div class="modal"><div class="modal-handle"></div><div class="modal-title">Що додати?</div>
+    <div style="display:flex;flex-direction:column;gap:10px;">
+      <button class="btn-primary" onclick="closeModal('addModal');openDiaryModal()">📓 Запис у щоденник</button>
+      <button class="btn-primary" style="background:var(--pink-600)" onclick="closeModal('addModal');openTaskModal()">✅ Нова задача</button>
+      <button class="btn-primary" style="background:var(--pink-800)" onclick="closeModal('addModal');openHabitModal()">🔁 Нова звичка</button>
+      <button class="btn-primary" style="background:var(--green-text)" onclick="closeModal('addModal');openFinanceModal()">💰 Фінансова операція</button>
+      <button class="btn-primary" style="background:#1D9E75" onclick="closeModal('addModal');openHealthModal()">⚖️ Вимірювання</button>
+      <button class="btn-primary" style="background:#185FA5" onclick="closeModal('addModal');openCollModal()">📚 Книга / Фільм</button>
+      <button class="btn-primary" style="background:#534AB7" onclick="closeModal('addModal');openGrowthModal()">🎓 Розвиток</button>
+      <button class="btn-primary" style="background:#BA7517" onclick="closeModal('addModal');openEventModal()">🗓️ Подія в календар</button>
+      <button class="btn-secondary" onclick="closeModal('addModal')">Скасувати</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const todayKey=()=>new Date().toISOString().slice(0,10);
+const monthKey=()=>new Date().toISOString().slice(0,7);
+function load(k,d){try{return JSON.parse(localStorage.getItem(k))??d;}catch{return d;}}
+function save(k,v){localStorage.setItem(k,JSON.stringify(v));}
+function fmt(n){return Number(n).toLocaleString('uk-UA',{minimumFractionDigits:0,maximumFractionDigits:0})+' ₴';}
+const MONTHS_UA=['січня','лютого','березня','квітня','травня','червня','липня','серпня','вересня','жовтня','листопада','грудня'];
+const MONTHS_SHORT=['січ','лют','бер','кві','тра','чер','лип','сер','вер','жов','лис','гру'];
+const MONTHS_FULL=['Січень','Лютий','Березень','Квітень','Травень','Червень','Липень','Серпень','Вересень','Жовтень','Листопад','Грудень'];
+const DAYS_SHORT=['Нд','Пн','Вт','Ср','Чт','Пт','Сб'];
+
+function init(){
+  const now=new Date();
+  const days=['Неділя','Понеділок','Вівторок','Середа','Четвер',"П'ятниця",'Субота'];
+  document.getElementById('headerDate').textContent=`${days[now.getDay()]}, ${now.getDate()} ${MONTHS_UA[now.getMonth()]} ${now.getFullYear()}`;
+  const h=now.getHours();
+  document.getElementById('headerGreeting').textContent=h<12?'Доброго ранку! ☀️':h<17?'Гарного дня! 🌸':'Гарного вечора! 🌙';
+  renderTodayDiary();renderTodayHabits();renderTodayTasks();renderFinanceSummary();renderTodayEvents();
+  // set today date in event modal
+  document.getElementById('eventDate').value=todayKey();
+}
+
+function showTab(name,btn){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('page-'+name).classList.add('active');
+  btn.classList.add('active');
+  if(name==='diary')renderDiaryList();
+  if(name==='habits'){renderHabitsPage();renderWeekRow();}
+  if(name==='tasks')renderAllTasks();
+  if(name==='finance')renderFinancePage();
+  if(name==='health')renderHealthPage();
+  if(name==='collections')renderCollections();
+  if(name==='growth')renderGrowth();
+  if(name==='planner'){renderPlannerWeek();renderPlannerSlots();}
+  if(name==='calendar'){renderCalendar();renderCalEvents();}
+}
+
+// DIARY
+function openDiaryModal(){const e=load('diary',{});document.getElementById('diaryInput').value=e[todayKey()]||'';document.getElementById('diaryModal').classList.add('open');}
+function saveDiary(){const t=document.getElementById('diaryInput').value.trim();if(!t){closeModal('diaryModal');return;}const e=load('diary',{});e[todayKey()]=t;save('diary',e);closeModal('diaryModal');renderTodayDiary();renderDiaryList();}
+function renderTodayDiary(){const e=load('diary',{});const el=document.getElementById('todayDiaryPreview');el.textContent=e[todayKey()]||'Натисніть, щоб записати думки...';el.style.fontStyle=e[todayKey()]?'italic':'normal';el.style.color=e[todayKey()]?'var(--text)':'var(--muted)';}
+function renderDiaryList(){const e=load('diary',{});const list=document.getElementById('diaryList');const keys=Object.keys(e).sort((a,b)=>b.localeCompare(a));list.innerHTML=keys.length?keys.map(k=>{const d=new Date(k);return`<div class="diary-card"><div class="diary-card-date">${d.getDate()} ${MONTHS_UA[d.getMonth()]} ${d.getFullYear()}</div><div class="diary-card-text">${e[k]}</div></div>`;}).join(''):'<div style="padding:40px;text-align:center;color:var(--muted);font-size:14px;">Поки немає записів</div>';}
+
+// HABITS
+function openHabitModal(){document.getElementById('habitModal').classList.add('open');}
+function saveHabit(){const n=document.getElementById('habitInput').value.trim();if(!n){closeModal('habitModal');return;}const h=load('habits',[]);h.push({id:Date.now(),name:n});save('habits',h);document.getElementById('habitInput').value='';closeModal('habitModal');renderTodayHabits();renderHabitsPage();}
+function toggleHabit(id){const d=load('habitsDone',{});const k=todayKey()+'_'+id;d[k]=!d[k];save('habitsDone',d);renderTodayHabits();renderHabitsPage();}
+function renderTodayHabits(){const habits=load('habits',[]);const done=load('habitsDone',{});const grid=document.getElementById('todayHabits');if(!habits.length){grid.innerHTML='<div style="grid-column:span 2;font-size:13px;color:var(--muted);padding:8px 0;">Додай звички на вкладці "Звички"</div>';document.getElementById('habitProgressText').textContent='0 з 0';document.getElementById('habitProgressFill').style.width='0%';return;}const dc=habits.filter(h=>done[todayKey()+'_'+h.id]).length;grid.innerHTML=habits.map(h=>{const id=done[todayKey()+'_'+h.id];return`<div class="habit-item" onclick="toggleHabit(${h.id})"><div class="habit-circle ${id?'done':''}"></div><span class="habit-name">${h.name}</span></div>`;}).join('');document.getElementById('habitProgressText').textContent=`${dc} з ${habits.length} виконано`;document.getElementById('habitProgressFill').style.width=(dc/habits.length*100)+'%';}
+function renderHabitsPage(){const habits=load('habits',[]);const done=load('habitsDone',{});const list=document.getElementById('habitsList');list.innerHTML=habits.length?habits.map(h=>{const id=done[todayKey()+'_'+h.id];return`<div class="habit-row"><span class="habit-row-name">${h.name}</span><button class="habit-toggle ${id?'on':''}" onclick="toggleHabit(${h.id})" aria-label="${h.name}"></button></div>`;}).join(''):'<div style="font-size:13px;color:var(--muted);padding:12px 0;">Додай першу звичку!</div>';}
+function renderWeekRow(){const row=document.getElementById('weekRow');const habits=load('habits',[]);const done=load('habitsDone',{});const today=new Date();const monday=new Date(today);monday.setDate(today.getDate()-((today.getDay()+6)%7));row.innerHTML=Array.from({length:7},(_,i)=>{const d=new Date(monday);d.setDate(monday.getDate()+i);const k=d.toISOString().slice(0,10);const isToday=k===todayKey();const anyDone=habits.some(h=>done[k+'_'+h.id]);return`<div class="week-day"><div class="week-day-label">${DAYS_SHORT[(i+1)%7]}</div><div class="week-day-dot ${isToday?'today':''} ${anyDone&&!isToday?'filled':''}">${d.getDate()}</div></div>`;}).join('');}
+
+// TASKS
+function openTaskModal(){document.getElementById('taskModal').classList.add('open');}
+function saveTask(){const t=document.getElementById('taskInput').value.trim();if(!t){closeModal('taskModal');return;}const tasks=load('tasks',[]);tasks.push({id:Date.now(),text:t,done:false,date:todayKey()});save('tasks',tasks);document.getElementById('taskInput').value='';closeModal('taskModal');renderTodayTasks();renderAllTasks();}
+function toggleTask(id){const tasks=load('tasks',[]);const t=tasks.find(t=>t.id===id);if(t)t.done=!t.done;save('tasks',tasks);renderTodayTasks();renderAllTasks();}
+function taskHtml(t){return`<div class="task-item"><div class="task-check ${t.done?'done':''}" onclick="toggleTask(${t.id})"></div><span class="task-text ${t.done?'done':''}">${t.text}</span></div>`;}
+function renderTodayTasks(){const tasks=load('tasks',[]).filter(t=>t.date===todayKey());document.getElementById('todayTasksList').innerHTML=tasks.length?tasks.map(taskHtml).join(''):'<div style="font-size:13px;color:var(--muted);padding:6px 0;">Задач поки немає</div>';}
+function renderAllTasks(){const tasks=load('tasks',[]).slice().reverse();document.getElementById('allTasksList').innerHTML=tasks.length?tasks.map(taskHtml).join(''):'<div style="font-size:13px;color:var(--muted);padding:6px 0;">Задач поки немає</div>';}
+
+// FINANCE
+let currentTxType='income';
+function setTxType(t){currentTxType=t;document.getElementById('typeIncome').classList.toggle('active',t==='income');document.getElementById('typeExpense').classList.toggle('active',t==='expense');}
+function openFinanceModal(){setTxType('income');document.getElementById('financeModal').classList.add('open');}
+function saveTransaction(){const name=document.getElementById('txName').value.trim();const amount=parseFloat(document.getElementById('txAmount').value);if(!name||!amount||amount<=0){closeModal('financeModal');return;}const txs=load('transactions',[]);txs.push({id:Date.now(),name,amount,type:currentTxType,date:todayKey(),month:monthKey()});save('transactions',txs);document.getElementById('txName').value='';document.getElementById('txAmount').value='';closeModal('financeModal');renderFinancePage();renderFinanceSummary();}
+function renderFinanceSummary(){const txs=load('transactions',[]).filter(t=>t.month===monthKey());const inc=txs.filter(t=>t.type==='income').reduce((s,t)=>s+t.amount,0);const exp=txs.filter(t=>t.type==='expense').reduce((s,t)=>s+t.amount,0);document.getElementById('todayIncome').textContent=fmt(inc);document.getElementById('todayExpense').textContent=fmt(exp);}
+function renderFinancePage(){const txs=load('transactions',[]).filter(t=>t.month===monthKey());const inc=txs.filter(t=>t.type==='income').reduce((s,t)=>s+t.amount,0);const exp=txs.filter(t=>t.type==='expense').reduce((s,t)=>s+t.amount,0);document.getElementById('finIncome').textContent=fmt(inc);document.getElementById('finExpense').textContent=fmt(exp);const bal=inc-exp;const balEl=document.getElementById('finBalance');balEl.textContent=fmt(Math.abs(bal));balEl.style.color=bal>=0?'var(--green-text)':'var(--pink-600)';const allTxs=load('transactions',[]).slice().reverse().slice(0,20);document.getElementById('txList').innerHTML=allTxs.length?allTxs.map(t=>{const d=new Date(t.date);return`<div class="tx-item"><div class="tx-icon ${t.type}">${t.type==='income'?'💚':'🌸'}</div><div class="tx-info"><div class="tx-name">${t.name}</div><div class="tx-date">${d.getDate()} ${MONTHS_SHORT[d.getMonth()]}</div></div><div class="tx-amount ${t.type}">${t.type==='income'?'+':'-'}${fmt(t.amount)}</div></div>`;}).join(''):'<div style="font-size:13px;color:var(--muted);padding:8px 0;">Операцій поки немає</div>';}
+
+// HEALTH
+function openHealthModal(){document.getElementById('healthModal').classList.add('open');}
+function saveHealth(){const w=parseFloat(document.getElementById('hWeight').value)||null;const waist=parseFloat(document.getElementById('hWaist').value)||null;const chest=parseFloat(document.getElementById('hChest').value)||null;const hips=parseFloat(document.getElementById('hHips').value)||null;if(!w&&!waist&&!chest&&!hips){closeModal('healthModal');return;}const logs=load('healthLog',[]);logs.push({id:Date.now(),date:todayKey(),weight:w,waist,chest,hips});save('healthLog',logs);['hWeight','hWaist','hChest','hHips'].forEach(id=>document.getElementById(id).value='');closeModal('healthModal');renderHealthPage();}
+function renderHealthPage(){const logs=load('healthLog',[]).slice().sort((a,b)=>b.date.localeCompare(a.date));const latest=logs[0];const prev=logs[1];if(latest&&latest.weight){document.getElementById('weightCurrent').textContent=latest.weight;if(prev&&prev.weight){const diff=(latest.weight-prev.weight).toFixed(1);const el=document.getElementById('weightChange');el.textContent=(diff>0?'▲ +':'▼ ')+diff+' кг від попереднього';el.className='weight-change '+(diff>0?'up':'down');}else{document.getElementById('weightChange').textContent='Перший запис!';}}else{document.getElementById('weightCurrent').textContent='—';document.getElementById('weightChange').textContent='Введіть першу позначку';}const weights=logs.filter(l=>l.weight).slice(0,8).reverse();const chart=document.getElementById('weightChart');if(weights.length>1){const min=Math.min(...weights.map(l=>l.weight));const max=Math.max(...weights.map(l=>l.weight));const range=max-min||1;chart.innerHTML=weights.map(l=>{const h=Math.max(6,Math.round(((l.weight-min)/range)*36)+4);return`<div class="mini-bar" style="height:${h}px"></div>`;}).join('');}else{chart.innerHTML='';}const measures=[{key:'waist',label:'Талія'},{key:'chest',label:'Груди'},{key:'hips',label:'Стегна'}];document.getElementById('measureGrid').innerHTML=measures.map(m=>{const val=logs.find(l=>l[m.key])?.[m.key]||'—';return`<div class="measure-item"><div class="measure-name">${m.label}</div><div class="measure-val">${val}<span class="measure-unit-sm"> см</span></div></div>`;}).join('');document.getElementById('healthLog').innerHTML=logs.length?logs.slice(0,10).map(l=>{const d=new Date(l.date);const vals=[];if(l.weight)vals.push(l.weight+' кг');if(l.waist)vals.push('Т: '+l.waist);if(l.chest)vals.push('Г: '+l.chest);if(l.hips)vals.push('С: '+l.hips);return`<div class="health-log-item"><div class="health-log-date">${d.getDate()} ${MONTHS_SHORT[d.getMonth()]}</div><div class="health-log-vals">${vals.join(' · ')}</div></div>`;}).join(''):'<div style="font-size:13px;color:var(--muted);padding:8px 0;">Записів поки немає</div>';}
+
+// COLLECTIONS
+let currentCollType='book';
+function setCollType(t,btn){currentCollType=t;document.querySelectorAll('.coll-tab').forEach(b=>b.classList.remove('active'));btn.classList.add('active');document.getElementById('collAddText').textContent=t==='book'?'Додати книгу':'Додати фільм';renderCollections();}
+function openCollModal(){document.getElementById('collModalTitle').textContent=currentCollType==='book'?'Нова книга':'Новий фільм';document.getElementById('collModal').classList.add('open');}
+function saveColl(){const title=document.getElementById('collTitle').value.trim();if(!title){closeModal('collModal');return;}const items=load('collections',[]);items.push({id:Date.now(),type:currentCollType,title,author:document.getElementById('collAuthor').value.trim(),status:document.getElementById('collStatus').value,note:document.getElementById('collNote').value.trim(),rating:0});save('collections',items);['collTitle','collAuthor','collNote'].forEach(id=>document.getElementById(id).value='');closeModal('collModal');renderCollections();}
+function setRating(id,r){const items=load('collections',[]);const item=items.find(i=>i.id===id);if(item){item.rating=r;save('collections',items);renderCollections();}}
+function renderCollections(){const items=load('collections',[]).filter(i=>i.type===currentCollType).slice().reverse();const statusLabel={want:'Хочу',reading:currentCollType==='book'?'Читаю':'Дивлюся',done:currentCollType==='book'?'Прочитано':'Переглянуто'};const emoji={book:'📖',movie:'🎬'};document.getElementById('collList').innerHTML=items.length?items.map(item=>{const stars=Array.from({length:5},(_,i)=>`<span class="star" onclick="setRating(${item.id},${i+1})">${i<item.rating?'★':'☆'}</span>`).join('');return`<div class="coll-item"><div class="coll-emoji">${emoji[item.type]}</div><div class="coll-info"><div class="coll-title">${item.title}</div>${item.author?`<div class="coll-author">${item.author}</div>`:''}<div class="coll-status ${item.status}">${statusLabel[item.status]}</div><div class="stars">${stars}</div>${item.note?`<div class="coll-note">${item.note}</div>`:''}</div></div>`;}).join(''):'<div style="font-size:13px;color:var(--muted);padding:8px 0;">Поки немає записів</div>';}
+
+// GROWTH
+let currentGrowthFilter='all';
+function setGrowthFilter(f,btn){currentGrowthFilter=f;document.querySelectorAll('.coll-tab').forEach(b=>b.classList.remove('active'));btn.classList.add('active');renderGrowth();}
+function openGrowthModal(){document.getElementById('growthModal').classList.add('open');}
+function saveGrowth(){const title=document.getElementById('growthTitle').value.trim();if(!title){closeModal('growthModal');return;}const items=load('growth',[]);items.push({id:Date.now(),type:document.getElementById('growthType').value,title,note:document.getElementById('growthNote').value.trim(),link:document.getElementById('growthLink').value.trim(),date:todayKey()});save('growth',items);['growthTitle','growthNote','growthLink'].forEach(id=>document.getElementById(id).value='');closeModal('growthModal');renderGrowth();}
+function renderGrowth(){const all=load('growth',[]).slice().reverse();const items=currentGrowthFilter==='all'?all:all.filter(i=>i.type===currentGrowthFilter);const icons={course:'📖',note:'✏️',link:'🔗'};const labels={course:'Курс',note:'Нотатка',link:'Посилання'};document.getElementById('growthList').innerHTML=items.length?items.map(item=>`<div class="growth-item"><div class="growth-icon">${icons[item.type]}</div><div class="growth-info"><div class="growth-title">${item.title}</div><span class="growth-type-badge ${item.type}">${labels[item.type]}</span>${item.note?`<div class="growth-note">${item.note}</div>`:''} ${item.link?`<div class="growth-link" onclick="window.open('${item.link}','_blank')">${item.link}</div>`:''}</div></div>`).join(''):'<div style="font-size:13px;color:var(--muted);padding:8px 0;">Поки немає записів</div>';}
+
+// PLANNER
+let selectedPlannerDay=todayKey();
+function openPlannerModal(){document.getElementById('plannerModal').classList.add('open');}
+function savePlannerEvent(){const title=document.getElementById('plannerEventTitle').value.trim();const time=document.getElementById('plannerTime').value;if(!title){closeModal('plannerModal');return;}const events=load('plannerEvents',[]);events.push({id:Date.now(),date:selectedPlannerDay,time,title});save('plannerEvents',events);document.getElementById('plannerEventTitle').value='';closeModal('plannerModal');renderPlannerSlots();}
+function renderPlannerWeek(){const today=new Date();const monday=new Date(today);monday.setDate(today.getDate()-((today.getDay()+6)%7));const row=document.getElementById('plannerWeek');row.innerHTML=Array.from({length:7},(_,i)=>{const d=new Date(monday);d.setDate(monday.getDate()+i);const k=d.toISOString().slice(0,10);const isSelected=k===selectedPlannerDay;return`<button class="planner-day-btn ${isSelected?'active':''}" onclick="selectPlannerDay('${k}',this)"><span class="day-name">${DAYS_SHORT[(i+1)%7]}</span><span class="day-num">${d.getDate()}</span></button>`;}).join('');}
+function selectPlannerDay(k,btn){selectedPlannerDay=k;document.querySelectorAll('.planner-day-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');const d=new Date(k);document.getElementById('plannerDayLabel').textContent=`${d.getDate()} ${MONTHS_UA[d.getMonth()]}`;renderPlannerSlots();}
+function renderPlannerSlots(){const events=load('plannerEvents',[]).filter(e=>e.date===selectedPlannerDay);const hours=['06:00','07:00','08:00','09:00','10:00','11:00','12:00','13:00','14:00','15:00','16:00','17:00','18:00','19:00','20:00','21:00','22:00'];document.getElementById('plannerSlots').innerHTML=hours.map(h=>{const ev=events.filter(e=>e.time===h);return`<div class="time-slot"><div class="time-label">${h}</div><div class="slot-content">${ev.length?ev.map(e=>`<div class="slot-event">${e.title}</div>`).join(''):'<div class="slot-empty">·</div>'}</div></div>`;}).join('');}
+
+// CALENDAR
+let calYear=new Date().getFullYear();let calMonth=new Date().getMonth();
+function changeMonth(d){calMonth+=d;if(calMonth>11){calMonth=0;calYear++;}if(calMonth<0){calMonth=11;calYear--;}renderCalendar();renderCalEvents();}
+function openEventModal(){document.getElementById('eventModal').classList.add('open');}
+function saveEvent(){const title=document.getElementById('eventTitle').value.trim();const date=document.getElementById('eventDate').value;if(!title||!date){closeModal('eventModal');return;}const events=load('calEvents',[]);events.push({id:Date.now(),title,date,note:document.getElementById('eventNote').value.trim()});save('calEvents',events);['eventTitle','eventNote'].forEach(id=>document.getElementById(id).value='');document.getElementById('eventDate').value=todayKey();closeModal('eventModal');renderCalendar();renderCalEvents();renderTodayEvents();}
+function renderCalendar(){document.getElementById('calMonth').textContent=`${MONTHS_FULL[calMonth]} ${calYear}`;const events=load('calEvents',[]);const eventDates=new Set(events.map(e=>e.date));const firstDay=new Date(calYear,calMonth,1).getDay();const daysInMonth=new Date(calYear,calMonth+1,0).getDate();const offset=(firstDay+6)%7;const grid=document.getElementById('calGrid');const dayNames=['Пн','Вт','Ср','Чт','Пт','Сб','Нд'];let html=dayNames.map(d=>`<div class="cal-day-name">${d}</div>`).join('');for(let i=0;i<offset;i++)html+=`<div></div>`;for(let d=1;d<=daysInMonth;d++){const k=`${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;const isToday=k===todayKey();const hasEv=eventDates.has(k);html+=`<div class="cal-day ${isToday?'today':''} ${hasEv?'has-event':''}" onclick="filterCalEvents('${k}')">${d}</div>`;}grid.innerHTML=html;}
+function renderCalEvents(dateFilter){const events=load('calEvents',[]).sort((a,b)=>a.date.localeCompare(b.date));const filtered=dateFilter?events.filter(e=>e.date===dateFilter):events.filter(e=>e.date.startsWith(`${calYear}-${String(calMonth+1).padStart(2,'0')}`));document.getElementById('calEventsLabel').textContent=dateFilter?'Події на день':'Події місяця';document.getElementById('calEventsList').innerHTML=filtered.length?filtered.map(e=>{const d=new Date(e.date);return`<div class="event-item"><div class="event-dot"></div><div class="event-info"><div class="event-title">${e.title}</div><div class="event-date">${d.getDate()} ${MONTHS_UA[d.getMonth()]} ${d.getFullYear()}${e.note?' · '+e.note:''}</div></div></div>`;}).join(''):'<div style="font-size:13px;color:var(--muted);padding:8px 0;">Подій немає</div>';}
+function filterCalEvents(k){renderCalEvents(k);}
+function renderTodayEvents(){const events=load('calEvents',[]);const today=todayKey();const upcoming=events.filter(e=>e.date>=today).sort((a,b)=>a.date.localeCompare(b.date)).slice(0,3);const el=document.getElementById('todayEvents');el.innerHTML=upcoming.length?upcoming.map(e=>{const d=new Date(e.date);const isToday=e.date===today;return`<div class="event-item"><div class="event-dot"></div><div class="event-info"><div class="event-title">${e.title}</div><div class="event-date">${isToday?'Сьогодні':d.getDate()+' '+MONTHS_UA[d.getMonth()]}${e.note?' · '+e.note:''}</div></div></div>`;}).join(''):'<div style="font-size:13px;color:var(--muted);">Немає найближчих подій</div>';}
+
+// MODALS
+function openAddModal(){document.getElementById('addModal').classList.add('open');}
+function closeModal(id){document.getElementById(id).classList.remove('open');}
+document.querySelectorAll('.modal-overlay').forEach(m=>{m.addEventListener('click',e=>{if(e.target===m)m.classList.remove('open');});});
+document.addEventListener('keydown',e=>{if(e.key==='Enter'){if(document.getElementById('taskModal').classList.contains('open'))saveTask();if(document.getElementById('habitModal').classList.contains('open'))saveHabit();}});
+
+init();
+if('serviceWorker' in navigator){navigator.serviceWorker.register('/sw.js');}
+</script>
+</body>
+</html>
